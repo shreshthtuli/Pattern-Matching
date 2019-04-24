@@ -5,11 +5,7 @@
 
 #define MASTER 0
 
-// /*
-// 	*****************************************************
-// 		TODO -- You must implement this function
-// 	*****************************************************
-// */
+
 void periodic_pattern_matching (
 		int n, 
 		char *text, 
