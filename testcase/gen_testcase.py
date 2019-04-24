@@ -27,8 +27,8 @@ import random
 import string
 
 # adjust these parameters to generate testcases
-n            = 10000    # length of text
-num_patterns = 10       # number of patterns to be searched
+n            = 100000    # length of text
+num_patterns = 100       # number of patterns to be searched
 min_p        = 2        # minimum period length
 min_m        = 5        # minimum pattern length
 num_chars	 = 26		# number of different characters in text and patterns,

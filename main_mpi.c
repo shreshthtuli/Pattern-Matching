@@ -68,6 +68,5 @@ int main(int argc, char const *argv[])
 		and outputs the results
 	*/
 	write_result(match_counts, matches, computation_time);
-
 	return 0;
 }
