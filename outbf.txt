@@ -1,0 +1,16 @@
+Numprocs = 1 rank = 0
+first = 0 last = 9
+Rank = 0
+All done, results:
+36 - 1 - woiwoiwoiwoiw
+- 0 - sxxhgokbsxxhgokbsx
+- 0 - uguuuguu
+- 0 - hrkxljdphrkxljdphr
+- 0 - ctpqctpqc
+- 0 - gorgorg
+- 0 - etfvchoetfvchoet
+- 0 - dbskdbskdb
+- 0 - guoryduguorydugu
+0 - 1 - oxgyoxgyoxgy
+
+Time elapsed: 0.164121

@@ -27,13 +27,13 @@ import random
 import string
 
 # adjust these parameters to generate testcases
-n            = 20    # length of text
-num_patterns = 3       # number of patterns to be searched
-min_p        = 2        # minimum period length
-min_m        = 5        # minimum pattern length
+n            = 1000    # length of text
+num_patterns = 50       # number of patterns to be searched
+min_p        = 3        # minimum period length
+min_m        = 10        # minimum pattern length
 num_chars	 = 26		# number of different characters in text and patterns,
 						# can't be more than 26
-max_m		 = 7		# maximum length of patterns, can be upto n
+max_m		 = 10		# maximum length of patterns, can be upto n
 
 def randomString(stringLength):
     """Generate a random string of fixed length """

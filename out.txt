@@ -1,0 +1,33 @@
+Numprocs = 1 rank = 0
+All done, results:
+36 - 1 - woiwoiwoiwoiw
+- 0 - sxxhgokbsxxhgokbsx
+- 0 - uguuuguu
+- 0 - hrkxljdphrkxljdphr
+- 0 - ctpqctpqc
+- 0 - gorgorg
+- 0 - etfvchoetfvchoet
+- 0 - dbskdbskdb
+- 0 - guoryduguorydugu
+0 - 1 - oxgyoxgyoxgy
+[DESKTOP-9UFTEMN:05924] *** Process received signal ***
+[DESKTOP-9UFTEMN:05924] Signal: Aborted (6)
+[DESKTOP-9UFTEMN:05924] Signal code:  (-6)
+[DESKTOP-9UFTEMN:05924] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x3ef20)[0x7f0ca216ef20]
+[DESKTOP-9UFTEMN:05924] [ 1] /lib/x86_64-linux-gnu/libc.so.6(gsignal+0xc7)[0x7f0ca216ee97]
+[DESKTOP-9UFTEMN:05924] [ 2] /lib/x86_64-linux-gnu/libc.so.6(abort+0x141)[0x7f0ca2170801]
+[DESKTOP-9UFTEMN:05924] [ 3] /lib/x86_64-linux-gnu/libc.so.6(+0x89897)[0x7f0ca21b9897]
+[DESKTOP-9UFTEMN:05924] [ 4] /lib/x86_64-linux-gnu/libc.so.6(+0x9090a)[0x7f0ca21c090a]
+[DESKTOP-9UFTEMN:05924] [ 5] /lib/x86_64-linux-gnu/libc.so.6(cfree+0x80f)[0x7f0ca21c815f]
+[DESKTOP-9UFTEMN:05924] [ 6] /usr/lib/x86_64-linux-gnu/libopen-pal.so.20(mca_base_var_group_finalize+0xfe)[0x7f0ca1a0c11e]
+[DESKTOP-9UFTEMN:05924] [ 7] /usr/lib/x86_64-linux-gnu/libopen-pal.so.20(mca_base_var_finalize+0x44c)[0x7f0ca1a05fec]
+[DESKTOP-9UFTEMN:05924] [ 8] /usr/lib/x86_64-linux-gnu/libopen-pal.so.20(opal_finalize_util+0x4a)[0x7f0ca19e727a]
+[DESKTOP-9UFTEMN:05924] [ 9] /usr/lib/x86_64-linux-gnu/libmpi.so.20(ompi_mpi_finalize+0x6e5)[0x7f0ca2b283d5]
+[DESKTOP-9UFTEMN:05924] [10] ppm(+0x11acc)[0x7f0ca3411acc]
+[DESKTOP-9UFTEMN:05924] [11] ppm(+0xb9c9)[0x7f0ca340b9c9]
+[DESKTOP-9UFTEMN:05924] [12] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xe7)[0x7f0ca2151b97]
+[DESKTOP-9UFTEMN:05924] [13] ppm(+0xb82a)[0x7f0ca340b82a]
+[DESKTOP-9UFTEMN:05924] *** End of error message ***
+--------------------------------------------------------------------------
+mpirun noticed that process rank 0 with PID 0 on node DESKTOP-9UFTEMN exited on signal 6 (Aborted).
+--------------------------------------------------------------------------

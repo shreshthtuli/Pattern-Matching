@@ -5,6 +5,7 @@
 
 #define MASTER 0
 
+using namespace std;
 
 void periodic_pattern_matching (
 		int n, 
@@ -18,7 +19,6 @@ void periodic_pattern_matching (
 {
 	int procs, rank;
 
-	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &procs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -30,9 +30,12 @@ void periodic_pattern_matching (
 	std::cout << "first = " << first << " last = " << last-1 << std::endl;
 
 	int* counts = new int[num_patterns];
+	int* pos_temp = new int[num_patterns*n];
+	int** pos = new int*[num_patterns];
 
 	int i, j, k; bool matched;
 
+	int idx = 0;
 	// Loop over all patterns
 	for(i = first; i < last; i++){
 		counts[i] = 0;
@@ -41,29 +44,41 @@ void periodic_pattern_matching (
 			// Check pattern i and position j of text
 			matched = true;
 			for(k = 0; k < m_set[i]; k++){
-				matched = matched && (pattern_set[i][k] == text[j+k]);
+				if(pattern_set[i][k] != text[j+k]){
+					matched = false; break;
+				}
 			}
-			if(matched){
-				counts[i] += 1;
-			}
+			if(!matched)
+				continue;
+			counts[i] += 1;
+			pos_temp[idx] = j;
+			idx++;
+		}
+	}
+
+	idx = 0;
+	for(int i = 0; i < num_patterns; i++){
+		pos[i] = new int[counts[i]];
+		for(int j = 0; j < counts[i]; j++){
+			pos[i][j] = pos_temp[idx];
+			idx++;
 		}
 	}
 
 	std::cout <<"Rank = " << rank << std::endl;
 
-	if(rank == MASTER){
-		MPI_Status s;
-		for(int i = 1; i < procs; i++){
-			first = (num_patterns*i/procs); last = num_patterns*(i+1)/procs;
-			MPI_Recv(counts+first, (last-first), MPI_INT, i, 0, MPI_COMM_WORLD, &s);
-		}
-		for(int i = 0; i < num_patterns; i++)
-			std::cout << "Count of pattern " << i << " is = " << counts[i] << std::endl;
-	}
-	else{
-		MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
-	}
+	// if(rank == MASTER){
+	// 	MPI_Status s;
+	// 	for(int i = 1; i < procs; i++){
+	// 		first = (num_patterns*i/procs); last = num_patterns*(i+1)/procs;
+	// 		MPI_Recv(counts+first, (last-first), MPI_INT, i, 0, MPI_COMM_WORLD, &s);
+	// 	}
+	// 	for(int i = 0; i < num_patterns; i++)
+	// 		std::cout << "Count of pattern " << i << " is = " << counts[i] << std::endl;
+	// }
+	// else{
+	// 	MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+	// }
 	
-	MPI_Finalize();
 	*match_counts = counts;
 }

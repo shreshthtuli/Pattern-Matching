@@ -58,4 +58,15 @@ void write_result (
         int *matches, 
         double computation_time);
 
+
+/* 
+Function to check the format of output code.
+You can call it from main to check if the array returned from your code matches with our specifications
+This is a dummy function. It is not the function that will be used for evaluation.
+*/
+void format_checker (
+        int num_patterns,
+        int *match_counts, 
+        int *matches);
+
 #endif

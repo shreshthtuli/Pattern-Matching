@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <math.h>
 #include "mpi.h"
+#include <algorithm>
 
 #define MASTER 0
 
@@ -79,7 +80,7 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 	// Parallelise across procs
 	for(bi = 0; bi < b; bi++)
 	{
-		first = n*bi/b; last = n*(bi+1)/b;
+		first = (int)(float(n*(float(bi)/b))); last = (int)(float(n)*(float(bi+1)/b));
 		i = first;
 		for(j = i+1; j < last; j++){
 			i = duel(T, n, p, phi, i, j);
@@ -89,9 +90,10 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 	}
 
 	// cout << "potential pos\n";
-	// for(int i = 0; i < n; i++)
+	// for(int i = 0; i < b; i++)
 	// 	cout << potential_pos[i] << " ";
 	// cout << endl;
+	// cout << "p = " << p << " , m = " << m << " , b = " << b << endl;
 
 	for(i = 0; i < b; i++){
 		if(match(T, potential_pos[i], p, m)){
@@ -99,6 +101,8 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 			count++;
 		}
 	}
+
+	// cout << "np done\n";
 
 	*match_count = count;
 	*matched_pos = matched_pos_temp;
@@ -110,10 +114,10 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 	for(int i = 0; i < 2*period-1; i++)
 		pPrime[i] = p[i];
 	
-	cout << p << " " << period << " ";
-	for(int i = 0; i < 2*period-1; i++)
-		cout << pPrime[i];
-	cout << endl;
+	// cout << p << " " << period << " ";
+	// for(int i = 0; i < 2*period-1; i++)
+	// 	cout << pPrime[i];
+	// cout << endl;
 	int ppi = pi(period, m);
 	int* witness = new int[ppi];
 	witn(&witness, ppi, pPrime);
@@ -123,10 +127,10 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 
 	npTextAnalysis(T, n, pPrime, 2*period-1, witness, procs, &count, &pos);
 
-	cout << "matched pos\n";
-	for(int i = 0; i < count; i++)
-		cout << pos[i] << " ";
-	cout << "- " << count << endl;
+	// cout << "matched pos\n";
+	// for(int i = 0; i < count; i++)
+	// 	cout << pos[i] << " ";
+	// cout << "- " << count << endl;
 
 	char* u = new char[period];
 	for(int i = 0; i < period; i++)
@@ -143,8 +147,8 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 	for(int i = 0; i < m-k*period; i++)
 		u2v[i+2*period] = v[i];
 
-	cout <<"u = " << u << " v = " << v << endl;
-	cout << "u2v = " << u2v << " - " << 2*period+(m-k*period) << " k = " << k << endl;
+	// cout <<"u = " << u << " v = " << v << endl;
+	// cout << "u2v = " << u2v << " - " << 2*period+(m-k*period) << " k = " << k << endl;
 
 	int* M = new int[n];
 	for(int i = 0; i < n; i++)
@@ -157,10 +161,10 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 			M[i] = 1;
 	}
 
-	cout << "M\n";
-	for(int i =0; i < n; i++)
-		cout << M[i] << " ";
-	cout << endl;
+	// cout << "M\n";
+	// for(int i =0; i < n; i++)
+	// 	cout << M[i] << " ";
+	// cout << endl;
 
 	int** S = new int*[period];
 	int** C = new int*[period];
@@ -172,12 +176,12 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 		}
 	}
 
-	cout << "S\n";
-	for(int i = 0; i < period; i++){
-		for(int j = 0; j < n/period; j++)
-			cout << S[i][j] << " ";
-		cout << endl;
-	}
+	// cout << "S\n";
+	// for(int i = 0; i < period; i++){
+	// 	for(int j = 0; j < n/period; j++)
+	// 		cout << S[i][j] << " ";
+	// 	cout << endl;
+	// }
 
 	for(int i=0; i < period; i++){
 		C[i] = new int[n/period];
@@ -192,12 +196,12 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 		}
 	}
 
-	cout << "C\n"; 
-	for(int i = 0; i < period; i++){
-		for(int j = 0; j < n/period; j++)
-			cout << C[i][j] << " ";
-		cout << endl;
-	}
+	// cout << "C\n"; 
+	// for(int i = 0; i < period; i++){
+	// 	for(int j = 0; j < n/period; j++)
+	// 		cout << C[i][j] << " ";
+	// 	cout << endl;
+	// }
 
 	count = 0;
 	int* Match = new int[n-m];
@@ -234,7 +238,6 @@ void periodic_pattern_matching (
 {
 	int procs, rank;
 	
-	MPI_Init(NULL, NULL);
 	MPI_Comm_size(MPI_COMM_WORLD, &procs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -248,13 +251,13 @@ void periodic_pattern_matching (
 	int* pi_set = new int[num_patterns];
 	int** witness = new int*[num_patterns];
 
-	// calcPi(pi_set, m_set, p_set, num_patterns);
-	// calcWitness(witness, pi_set, pattern_set, num_patterns);
+	calcPi(pi_set, m_set, p_set, num_patterns);
+	calcWitness(witness, pi_set, pattern_set, num_patterns);
 	
 	int i, j, k; bool matched;
 
 	for(int i = 0; i < num_patterns; i++){
-		cout << "n = " << n << " m = " << m_set[i] << " period = " << p_set[i] << endl;
+		// cout << "n = " << n << " m = " << m_set[i] << " period = " << p_set[i] << endl;
 		if(float(p_set[i]) <= float(m_set[i])/2)
 			pTextAnalysis(text, n, pattern_set[i], m_set[i], p_set[i], procs, &counts[i], &match_pos[i]);
 		else
@@ -270,14 +273,6 @@ void periodic_pattern_matching (
 		}
 	}
 	
-	cout << "All done, results:\n";
-	for(int i = 0; i < num_patterns; i++){
-		for(int j = 0; j < counts[i]; j++){
-			cout << match_pos[i][j] << " ";
-		}
-		cout << "- " << counts[i] << " - " << pattern_set[i] << endl;
-	}
-	MPI_Finalize();
 	*match_counts = counts;
 	*matches = matched_pos_res;
 }
