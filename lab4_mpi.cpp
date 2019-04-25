@@ -76,15 +76,18 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 	int count = 0;
 
 	// cout << "Text=" << T << ", p=" << p << endl;
+	// cout << "p= " << p << endl;
 
+	int size = ceil(float(m)/2);
+
+	last = 0; 
 	// Parallelise across procs
 	for(bi = 0; bi < b; bi++)
 	{
-		first = (int)(float(n*(float(bi)/b))); last = (int)(float(n)*(float(bi+1)/b));
+		first = last; last = first+size;
 		i = first;
 		for(j = i+1; j < last; j++){
 			i = duel(T, n, p, phi, i, j);
-			// cout << "duel(" << i << "," << j << ") = " << i << endl;
 		}
 		potential_pos[bi] = i;
 	}
@@ -115,14 +118,14 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 		pPrime[i] = p[i];
 	
 	// cout << p << " " << period << " ";
-	// for(int i = 0; i < 2*period-1; i++)
-	// 	cout << pPrime[i];
-	// cout << endl;
 	int ppi = pi(period, m);
 	int* witness = new int[ppi];
 	witn(&witness, ppi, pPrime);
 
-	// cout << witness[0] << " " << witness[1] << " - " << ppi << endl;
+	// cout << "phi (pi = " << ppi << ")\n";
+	// for(int i = 0; i < ppi; i++)
+	// 	cout << witness[i] << " ";
+	// cout << endl;
 	int count, *pos;
 
 	npTextAnalysis(T, n, pPrime, 2*period-1, witness, procs, &count, &pos);
@@ -267,6 +270,7 @@ void periodic_pattern_matching (
 
 	int* matched_pos_res = new int[sum_counts]; int p = 0;
 	for(int i = 0; i < num_patterns; i++){
+		sort(match_pos[i], match_pos[i]+counts[i]);
 		for(int j = 0; j < counts[i]; j++){
 			matched_pos_res[p] = match_pos[i][j];
 			p++;

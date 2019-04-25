@@ -27,7 +27,7 @@ void periodic_pattern_matching (
 	int first = num_patterns*rank/procs;
 	int last = num_patterns*(rank+1)/procs;
 
-	std::cout << "first = " << first << " last = " << last-1 << std::endl;
+	// std::cout << "first = " << first << " last = " << last-1 << std::endl;
 
 	int* counts = new int[num_patterns];
 	int* pos_temp = new int[num_patterns*n];
@@ -65,7 +65,7 @@ void periodic_pattern_matching (
 		}
 	}
 
-	std::cout <<"Rank = " << rank << std::endl;
+	// std::cout <<"Rank = " << rank << std::endl;
 
 	// if(rank == MASTER){
 	// 	MPI_Status s;
@@ -80,5 +80,6 @@ void periodic_pattern_matching (
 	// 	MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
 	// }
 	
+	*matches = pos_temp;
 	*match_counts = counts;
 }

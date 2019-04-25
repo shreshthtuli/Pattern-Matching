@@ -25,20 +25,30 @@
 
 import random
 import string
+import re
 
 # adjust these parameters to generate testcases
-n            = 1000    # length of text
-num_patterns = 50       # number of patterns to be searched
-min_p        = 3        # minimum period length
-min_m        = 10        # minimum pattern length
+n            = 10000000    # length of text
+num_patterns = 100       # number of patterns to be searched
+min_p        = 2        # minimum period length
+min_m        = 5        # minimum pattern length
 num_chars	 = 26		# number of different characters in text and patterns,
 						# can't be more than 26
-max_m		 = 10		# maximum length of patterns, can be upto n
+max_m		 = 100		# maximum length of patterns, can be upto n
 
 def randomString(stringLength):
     """Generate a random string of fixed length """
     letters = string.ascii_lowercase[:num_chars]
     return ''.join(random.choice(letters) for i in range(stringLength))
+
+def isNonPeriodic(testString):
+	x = re.search(r'\b(\w*)(\w+\1)\2+\b', testString)
+	if x:
+		# print(testString, 'is periodic')
+		return True
+	else:
+		# print(testString, 'is not periodic')
+		return False
 
 
 m_set = []
@@ -58,6 +68,8 @@ for i in range(num_patterns):
 # generate patterns
 for i in range(num_patterns):
 	period_str = randomString(p_set[i])
+	while isNonPeriodic(period_str):
+		period_str = randomString(p_set[i])
 	pattern = period_str * (m_set[i] // p_set[i])
 	pattern = pattern + period_str[0 : (m_set[i]-len(pattern))]
 	pattern_set.append(pattern)
