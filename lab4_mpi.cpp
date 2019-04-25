@@ -109,15 +109,29 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs)
 	npTextAnalysis(T, n, p, m, witness, procs, &count, &pos);
 
 	char* u = new char[period];
-	for(int i = 0; i < p; i++)
+	for(int i = 0; i < period; i++)
 		u[i] = p[i];
 
 	int k = floor(float(m)/period);
 	char* v = new char[m - k*period];
+	for(int i = 0; i < (m-k*period); i++)
+		v[i] = p[i];
+
+	char* u2v = new char[2*period + (m - k*period)];
+	for(int i = 0; i < 2*period; i++)
+		u2v[i] = u[i%period];
+	for(int i = 0; i < m-k*period; i++)
+		u2v[i+2*period] = v[i];
+
+	int* M = new int[n];
+	for(int i = 0; i < n; i++)
+		M[i] = 0;
+		
 	int i;
 	for(int j = 0; j < count; j++){
 		i = pos[j];
-		if()
+		if(match(T, i, u2v, 2*period+(m-k*preiod)))
+			M[i] = 1;
 	}
 }
 
