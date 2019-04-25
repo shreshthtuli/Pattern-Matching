@@ -75,7 +75,13 @@ int main(int argc, char *argv[])
 		write_result(match_counts, matches, total_time);
 	}
 
-	format_checker(num_patterns, match_counts, matches);
+	int procs, rank;
+
+	MPI_Comm_size(MPI_COMM_WORLD, &procs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if(rank == 0)
+		format_checker(num_patterns, match_counts, matches);
 
 	MPI_Finalize();
 

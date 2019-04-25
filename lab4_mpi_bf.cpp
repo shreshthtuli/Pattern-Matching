@@ -22,7 +22,7 @@ void periodic_pattern_matching (
 	MPI_Comm_size(MPI_COMM_WORLD, &procs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	std::cout << "Numprocs = " << procs << " rank = " << rank << std::endl;
+	// std::cout << "Numprocs = " << procs << " rank = " << rank << std::endl;
 
 	int first = num_patterns*rank/procs;
 	int last = num_patterns*(rank+1)/procs;
@@ -57,7 +57,7 @@ void periodic_pattern_matching (
 	}
 
 	idx = 0;
-	for(int i = 0; i < num_patterns; i++){
+	for(int i = first; i < last; i++){
 		pos[i] = new int[counts[i]];
 		for(int j = 0; j < counts[i]; j++){
 			pos[i][j] = pos_temp[idx];
@@ -67,19 +67,35 @@ void periodic_pattern_matching (
 
 	// std::cout <<"Rank = " << rank << std::endl;
 
-	// if(rank == MASTER){
-	// 	MPI_Status s;
-	// 	for(int i = 1; i < procs; i++){
-	// 		first = (num_patterns*i/procs); last = num_patterns*(i+1)/procs;
-	// 		MPI_Recv(counts+first, (last-first), MPI_INT, i, 0, MPI_COMM_WORLD, &s);
-	// 	}
-	// 	for(int i = 0; i < num_patterns; i++)
-	// 		std::cout << "Count of pattern " << i << " is = " << counts[i] << std::endl;
-	// }
-	// else{
-	// 	MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
-	// }
+	if(rank == MASTER){
+		MPI_Status s;
+		for(int i = 1; i < procs; i++){
+			first = (num_patterns*i/procs); last = num_patterns*(i+1)/procs;
+			MPI_Recv(counts+first, (last-first), MPI_INT, i, 0, MPI_COMM_WORLD, &s);
+			// cout << "Recv from proc " << i << endl;
+			for(int j = first; j < last; j++){
+				pos[j] = new int[counts[j]];
+				MPI_Recv(pos[j], counts[j], MPI_INT, i, 0, MPI_COMM_WORLD, &s);
+			}
+		}
+		// for(int i = 0; i < num_patterns; i++)
+		// 	std::cout << "Count of pattern " << i << " is = " << counts[i] << std::endl;
+		int* matched_pos_res = new int[num_patterns*n]; int p = 0;
+		for(int i = 0; i < num_patterns; i++){
+			for(int j = 0; j < counts[i]; j++){
+				matched_pos_res[p] = pos[i][j];
+				p++;
+			}
+		}
+		*match_counts = counts;
+		*matches = matched_pos_res;
+		MPI_Barrier(MPI_COMM_WORLD);
+	}
+	else{
+		MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+		for(int j = first; j < last; j++)
+			MPI_Send(pos[j], counts[j], MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD);
+	}
 	
-	*matches = pos_temp;
-	*match_counts = counts;
 }

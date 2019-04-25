@@ -117,7 +117,8 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 	for(int i = 0; i < 2*period-1; i++)
 		pPrime[i] = p[i];
 	
-	// cout << p << " " << period << " ";
+	if(p[0] == 'z' && p[1] == 'z' && p[2] == 't')
+		cout << p << " " << period << " ";	
 	int ppi = pi(period, m);
 	int* witness = new int[ppi];
 	witn(&witness, ppi, pPrime);
@@ -245,7 +246,7 @@ void periodic_pattern_matching (
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	int* counts = new int[num_patterns];
-	int** match_pos = new int*[num_patterns];
+	int** pos = new int*[num_patterns];
 	int sum_counts = 0;
 
 	std::cout << "Numprocs = " << procs << " rank = " << rank << std::endl;
@@ -259,24 +260,45 @@ void periodic_pattern_matching (
 	
 	int i, j, k; bool matched;
 
-	for(int i = 0; i < num_patterns; i++){
+	int first = num_patterns*rank/procs;
+	int last = num_patterns*(rank+1)/procs;
+
+	for(int i = first; i < last; i++){
 		// cout << "n = " << n << " m = " << m_set[i] << " period = " << p_set[i] << endl;
 		if(float(p_set[i]) <= float(m_set[i])/2)
-			pTextAnalysis(text, n, pattern_set[i], m_set[i], p_set[i], procs, &counts[i], &match_pos[i]);
+			pTextAnalysis(text, n, pattern_set[i], m_set[i], p_set[i], procs, &counts[i], &pos[i]);
 		else
-			npTextAnalysis(text, n, pattern_set[i], m_set[i], witness[i], procs, &counts[i], &match_pos[i]);
+			npTextAnalysis(text, n, pattern_set[i], m_set[i], witness[i], procs, &counts[i], &pos[i]);
 		sum_counts += counts[i];
 	}
 
-	int* matched_pos_res = new int[sum_counts]; int p = 0;
-	for(int i = 0; i < num_patterns; i++){
-		sort(match_pos[i], match_pos[i]+counts[i]);
-		for(int j = 0; j < counts[i]; j++){
-			matched_pos_res[p] = match_pos[i][j];
-			p++;
+
+	if(rank == MASTER){
+		MPI_Status s;
+		for(int i = 1; i < procs; i++){
+			first = (num_patterns*i/procs); last = num_patterns*(i+1)/procs;
+			MPI_Recv(counts+first, (last-first), MPI_INT, i, 0, MPI_COMM_WORLD, &s);
+			for(int j = first; j < last; j++){
+				pos[j] = new int[counts[j]];
+				MPI_Recv(pos[j], counts[j], MPI_INT, i, 0, MPI_COMM_WORLD, &s);
+			}
 		}
+		int* matched_pos_res = new int[num_patterns*n]; int p = 0;
+		for(int i = 0; i < num_patterns; i++){
+			sort(pos[i], pos[i]+counts[i]);
+			for(int j = 0; j < counts[i]; j++){
+				matched_pos_res[p] = pos[i][j];
+				p++;
+			}
+		}
+		*match_counts = counts;
+		*matches = matched_pos_res;
+		MPI_Barrier(MPI_COMM_WORLD);
 	}
-	
-	*match_counts = counts;
-	*matches = matched_pos_res;
+	else{
+		MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+		for(int j = first; j < last; j++)
+			MPI_Send(pos[j], counts[j], MPI_INT, MASTER, 0, MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD);
+	}
 }
