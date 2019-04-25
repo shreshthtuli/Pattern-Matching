@@ -74,7 +74,7 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 	int* matched_pos_temp = new int[b];
 	int count = 0;
 
-	cout << "Text=" << T << ", p=" << p << endl;
+	// cout << "Text=" << T << ", p=" << p << endl;
 
 	// Parallelise across procs
 	for(bi = 0; bi < b; bi++)
@@ -83,14 +83,15 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 		i = first;
 		for(j = i+1; j < last; j++){
 			i = duel(T, n, p, phi, i, j);
-			cout << "duel(" << i << "," << j << ") = " << i << endl;
+			// cout << "duel(" << i << "," << j << ") = " << i << endl;
 		}
 		potential_pos[bi] = i;
 	}
 
-	for(int i = 0; i < n; i++)
-		cout << potential_pos[i] << " ";
-	cout << endl;
+	// cout << "potential pos\n";
+	// for(int i = 0; i < n; i++)
+	// 	cout << potential_pos[i] << " ";
+	// cout << endl;
 
 	for(i = 0; i < b; i++){
 		if(match(T, potential_pos[i], p, m)){
@@ -103,13 +104,13 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 	*matched_pos = matched_pos_temp;
 }
 
-void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs)
+void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* match_count, int** matched_pos)
 {
 	char* pPrime = new char[2*period-1];
 	for(int i = 0; i < 2*period-1; i++)
 		pPrime[i] = p[i];
 	
-	cout << p << " " << pPrime << " ";
+	cout << p << " " << period << " ";
 	for(int i = 0; i < 2*period-1; i++)
 		cout << pPrime[i];
 	cout << endl;
@@ -117,11 +118,12 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs)
 	int* witness = new int[ppi];
 	witn(&witness, ppi, pPrime);
 
-	cout << witness[0] << " " << witness[1] << " - " << ppi << endl;
+	// cout << witness[0] << " " << witness[1] << " - " << ppi << endl;
 	int count, *pos;
 
 	npTextAnalysis(T, n, pPrime, 2*period-1, witness, procs, &count, &pos);
 
+	cout << "matched pos\n";
 	for(int i = 0; i < count; i++)
 		cout << pos[i] << " ";
 	cout << "- " << count << endl;
@@ -133,13 +135,16 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs)
 	int k = floor(float(m)/period);
 	char* v = new char[m - k*period];
 	for(int i = 0; i < (m-k*period); i++)
-		v[i] = p[i];
+		v[i] = p[k*period+i];
 
 	char* u2v = new char[2*period + (m - k*period)];
 	for(int i = 0; i < 2*period; i++)
 		u2v[i] = u[i%period];
 	for(int i = 0; i < m-k*period; i++)
 		u2v[i+2*period] = v[i];
+
+	cout <<"u = " << u << " v = " << v << endl;
+	cout << "u2v = " << u2v << " - " << 2*period+(m-k*period) << " k = " << k << endl;
 
 	int* M = new int[n];
 	for(int i = 0; i < n; i++)
@@ -152,17 +157,34 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs)
 			M[i] = 1;
 	}
 
-	int* S = new int[n/period];
+	cout << "M\n";
+	for(int i =0; i < n; i++)
+		cout << M[i] << " ";
+	cout << endl;
+
+	int** S = new int*[period];
 	int** C = new int*[period];
-	for(int i = 0; i < n; i+=period)
-		S[i/period] = M[i];
+	for(int i = 0; i < period; i++){
+		S[i] = new int[n/period];
+		for(int j=0; j<n/period; j++){
+			// cout << "i+period*j = " << i+period*j << endl;
+			S[i][j] = M[i+period*j];
+		}
+	}
+
+	cout << "S\n";
+	for(int i = 0; i < period; i++){
+		for(int j = 0; j < n/period; j++)
+			cout << S[i][j] << " ";
+		cout << endl;
+	}
 
 	for(int i=0; i < period; i++){
 		C[i] = new int[n/period];
 		for(int j = 0; j < n/period; j++){
 			C[i][j] = 1;
-			for(int p = j; p < j+k; p++){
-				if(S[p] == 0){
+			for(int p = j; p < j+k-1; p++){
+				if(S[i][p] == 0){
 					C[i][j] = 0;
 					break;
 				}
@@ -170,16 +192,34 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs)
 		}
 	}
 
+	cout << "C\n"; 
+	for(int i = 0; i < period; i++){
+		for(int j = 0; j < n/period; j++)
+			cout << C[i][j] << " ";
+		cout << endl;
+	}
+
+	count = 0;
 	int* Match = new int[n-m];
+	int* Match_pos = new int[n-m];
 	for(int i = 0; i < period; i++){
 		for(int l = 0; l < n/period; l++){
-			if(i+l*period < n-m+1)
+			if(i+l*period < n-m+1){
 				Match[i+l*period] = C[i][l];
+				if(C[i][l] == 1){
+					Match_pos[count] = i+l*period;
+					count++;
+				}
+			}
 		}
 	}
 
-	for(int i = 0; i < n-m+1; i++)
-		cout << "M[" << i << "] = " << M[i] << endl;
+	*matched_pos = Match_pos;
+	*match_count = count;
+	// cout << "Match\n";
+	// for(int i = 0; i < n-m+1; i++)
+	// 	cout << Match[i] << " ";
+	// cout << endl;
 }
 
 void periodic_pattern_matching (
@@ -198,10 +238,13 @@ void periodic_pattern_matching (
 	MPI_Comm_size(MPI_COMM_WORLD, &procs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+	int* counts = new int[num_patterns];
+	int** match_pos = new int*[num_patterns];
+	int sum_counts = 0;
+
 	std::cout << "Numprocs = " << procs << " rank = " << rank << std::endl;
 	// std::cout << "first = " << first << " last = " << last-1 << std::endl;
 
-	int* counts = new int[num_patterns];
 	int* pi_set = new int[num_patterns];
 	int** witness = new int*[num_patterns];
 
@@ -212,9 +255,29 @@ void periodic_pattern_matching (
 
 	for(int i = 0; i < num_patterns; i++){
 		cout << "n = " << n << " m = " << m_set[i] << " period = " << p_set[i] << endl;
-		pTextAnalysis(text, n, pattern_set[i], m_set[i], p_set[i], procs);
+		if(float(p_set[i]) <= float(m_set[i])/2)
+			pTextAnalysis(text, n, pattern_set[i], m_set[i], p_set[i], procs, &counts[i], &match_pos[i]);
+		else
+			npTextAnalysis(text, n, pattern_set[i], m_set[i], witness[i], procs, &counts[i], &match_pos[i]);
+		sum_counts += counts[i];
+	}
+
+	int* matched_pos_res = new int[sum_counts]; int p = 0;
+	for(int i = 0; i < num_patterns; i++){
+		for(int j = 0; j < counts[i]; j++){
+			matched_pos_res[p] = match_pos[i][j];
+			p++;
+		}
 	}
 	
+	cout << "All done, results:\n";
+	for(int i = 0; i < num_patterns; i++){
+		for(int j = 0; j < counts[i]; j++){
+			cout << match_pos[i][j] << " ";
+		}
+		cout << "- " << counts[i] << " - " << pattern_set[i] << endl;
+	}
 	MPI_Finalize();
 	*match_counts = counts;
+	*matches = matched_pos_res;
 }
