@@ -2,3 +2,5 @@ a.out
 .vscode/**
 testcase/testcase*
 ppm
+ppmbf
+*.zip
