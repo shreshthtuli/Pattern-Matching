@@ -41,7 +41,7 @@ void witn(int** witness, int pi, char* pattern)
 	int* phi = new int[pi];
 	phi[0] = 0; int j, k;
 	for(j = 1; j < pi; j++){
-		for(k = 0; k < pi - j; k++){
+		for(k = 0; k < pi; k++){
 			if(pattern[k] != pattern[j+k])
 				break;
 		}
@@ -52,6 +52,8 @@ void witn(int** witness, int pi, char* pattern)
 
 int duel(char* Z, int n, char* pattern, int* phi, int i, int j)
 {
+	// if(i == 17500 && (pattern[0] == 'z' && pattern[1] == 'z' && pattern[2] == 't'))
+	// 	cout << "i = " << i << " j = " << j << " k = " << phi[j-i] << " Z[j+k] = " << Z[j+phi[j-i]] << " p[k] = " << pattern[phi[j-i]] << endl;
 	int k = phi[j-i];
 	if((j+k < 0 || j+k > n) || Z[j+k] != pattern[k])
 		return i;
@@ -86,17 +88,22 @@ void npTextAnalysis(char* T, int n, char* p, int m, int* phi, int procs, int* ma
 	{
 		first = last; last = first+size;
 		i = first;
+		// if(first == 17500 && (p[0] == 'z' && p[1] == 'z' && p[2] == 't'))
+		// 	cout << "first = " << first << " last = " << last << " pattern = " << p << endl;
 		for(j = i+1; j < last; j++){
 			i = duel(T, n, p, phi, i, j);
 		}
 		potential_pos[bi] = i;
 	}
 
+	// if(p[0] == 'z' && p[1] == 'z' && p[2] == 't'){
 	// cout << "potential pos\n";
 	// for(int i = 0; i < b; i++)
 	// 	cout << potential_pos[i] << " ";
 	// cout << endl;
 	// cout << "p = " << p << " , m = " << m << " , b = " << b << endl;
+	// }
+
 
 	for(i = 0; i < b; i++){
 		if(match(T, potential_pos[i], p, m)){
@@ -117,24 +124,31 @@ void pTextAnalysis(char* T, int n, char* p, int m, int period, int procs, int* m
 	for(int i = 0; i < 2*period-1; i++)
 		pPrime[i] = p[i];
 	
-	if(p[0] == 'z' && p[1] == 'z' && p[2] == 't')
-		cout << p << " " << period << " ";	
+	// if(p[0] == 'z' && p[1] == 'z' && p[2] == 't')
+	// 	cout << p << " " << period << " ";	
 	int ppi = pi(period, m);
 	int* witness = new int[ppi];
 	witn(&witness, ppi, pPrime);
 
+	// if(p[0] == 'z' && p[1] == 'z' && p[2] == 't'){
 	// cout << "phi (pi = " << ppi << ")\n";
 	// for(int i = 0; i < ppi; i++)
 	// 	cout << witness[i] << " ";
 	// cout << endl;
+	// }
+
 	int count, *pos;
 
 	npTextAnalysis(T, n, pPrime, 2*period-1, witness, procs, &count, &pos);
 
-	// cout << "matched pos\n";
-	// for(int i = 0; i < count; i++)
-	// 	cout << pos[i] << " ";
-	// cout << "- " << count << endl;
+	
+	// if(p[0] == 'z' && p[1] == 'z' && p[2] == 't'){
+	// 	cout << "matched pos\n";
+	// 	for(int i = 0; i < count; i++)
+	// 		cout << pos[i] << " ";
+	// 	cout << "- " << count << endl;
+	// }
+
 
 	char* u = new char[period];
 	for(int i = 0; i < period; i++)
@@ -249,7 +263,7 @@ void periodic_pattern_matching (
 	int** pos = new int*[num_patterns];
 	int sum_counts = 0;
 
-	std::cout << "Numprocs = " << procs << " rank = " << rank << std::endl;
+	// std::cout << "Numprocs = " << procs << " rank = " << rank << std::endl;
 	// std::cout << "first = " << first << " last = " << last-1 << std::endl;
 
 	int* pi_set = new int[num_patterns];
@@ -293,12 +307,10 @@ void periodic_pattern_matching (
 		}
 		*match_counts = counts;
 		*matches = matched_pos_res;
-		MPI_Barrier(MPI_COMM_WORLD);
 	}
 	else{
 		MPI_Send(counts+first, (last-first), MPI_INT, MASTER, 0, MPI_COMM_WORLD);
 		for(int j = first; j < last; j++)
 			MPI_Send(pos[j], counts[j], MPI_INT, MASTER, 0, MPI_COMM_WORLD);
-		MPI_Barrier(MPI_COMM_WORLD);
 	}
 }
